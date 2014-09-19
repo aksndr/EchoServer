@@ -76,10 +76,10 @@ public class Netty {
             bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
                 public ChannelPipeline getPipeline() {
                     return Channels.pipeline(
-                            new DelimiterBasedFrameDecoder(maxBufLength, true, Delimiters.lineDelimiter()),
                             new StringDecoder(CharsetUtil.UTF_8),
                             new StringEncoder(CharsetUtil.UTF_8),
-                            new EchoServerHandler());
+                            new EchoServerHandler(),
+                            new DelimiterBasedFrameDecoder(maxBufLength, true, Delimiters.lineDelimiter()));
                 }
             });
 
