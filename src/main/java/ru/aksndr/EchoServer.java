@@ -40,6 +40,7 @@ public class EchoServer  {
         public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception {
             ChannelBuffer buf = (ChannelBuffer) e.getMessage();
             while(buf.readable()) {
+
                 System.out.println((char) buf.readByte());
                 System.out.flush();
             }
