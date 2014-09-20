@@ -5,13 +5,10 @@ package ru.aksndr;
  */
 
 import org.jboss.netty.bootstrap.ServerBootstrap;
+import org.jboss.netty.buffer.ChannelBuffer;
+import org.jboss.netty.buffer.DynamicChannelBuffer;
 import org.jboss.netty.channel.*;
 import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;
-import org.jboss.netty.handler.codec.frame.DelimiterBasedFrameDecoder;
-import org.jboss.netty.handler.codec.frame.Delimiters;
-import org.jboss.netty.handler.codec.string.StringDecoder;
-import org.jboss.netty.handler.codec.string.StringEncoder;
-import org.jboss.netty.util.CharsetUtil;
 
 import java.net.InetSocketAddress;
 import java.util.concurrent.Executors;
@@ -37,10 +34,17 @@ public class Netty {
 
             //Use channel buffer to get the message from MessageEvent e and copy each character read to a string
 //check for occurence of '\n' or '\r' characters and if yes then print the above string
-            Channel channel = ctx.getChannel();
+            Channel channel = e.getChannel();
+            ChannelBuffer buf = (ChannelBuffer) e.getMessage();
+            ChannelBuffer bufr = new DynamicChannelBuffer(1);
+            StringBuffer stringBuffer = new StringBuffer();
+            while (buf.readable()){
+                bufr = buf.slice();
+                stringBuffer.append(bufr.array());
+            }
+//            String msg = (String) e.getMessage();
 
-            String msg = (String) e.getMessage();
-            channel.write(msg);
+            channel.write(stringBuffer.toString());
 
         }
 
@@ -76,10 +80,11 @@ public class Netty {
             bootstrap.setPipelineFactory(new ChannelPipelineFactory() {
                 public ChannelPipeline getPipeline() {
                     return Channels.pipeline(
-                            new StringDecoder(CharsetUtil.UTF_8),
-                            new StringEncoder(CharsetUtil.UTF_8),
-                            new EchoServerHandler(),
-                            new DelimiterBasedFrameDecoder(maxBufLength, true, Delimiters.lineDelimiter()));
+//                            new DelimiterBasedFrameDecoder(maxBufLength, true, Delimiters.lineDelimiter()),
+//                            new StringDecoder(CharsetUtil.UTF_8),
+//                            new StringEncoder(CharsetUtil.UTF_8),
+                            new EchoServerHandler()
+                            );
                 }
             });
 
