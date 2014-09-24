@@ -1,5 +1,3 @@
-package ru.aksndr;
-
 /**
  * Created by aksndr on 18.09.2014.
  */
@@ -22,12 +20,21 @@ import static org.jboss.netty.channel.Channels.pipeline;
 
 
 public class EchoServer {
-    private final int port;
-    private final int maxBytes;
 
-    public EchoServer(int port, int maxBytes) {
+    public static void main(String[] args) throws Exception {
+        int port;
+        if (args.length > 0) {
+            port = Integer.parseInt(args[0]);
+        } else {
+            port = 8080;
+        }
+        new EchoServer(port).start();
+    }
+
+    private final int port;
+
+    public EchoServer(int port) {
         this.port = port;
-        this.maxBytes = maxBytes;
     }
 
     public void start() {
@@ -36,7 +43,7 @@ public class EchoServer {
                         Executors.newCachedThreadPool(),
                         Executors.newCachedThreadPool()));
         // Set up the pipeline factory.
-        bootstrap.setPipelineFactory(new ServerPipelineFactory(maxBytes));
+        bootstrap.setPipelineFactory(new ServerPipelineFactory());
         // Bind and start to accept incoming connections.
         // The InetSocketAddress plays role of the wrapper facade in the Wrapper Facade pattern
         // The bind method plays role of the acceptor in the Acceptor-Connector pattern.
@@ -91,17 +98,12 @@ public class EchoServer {
     }
 
     class ServerPipelineFactory implements ChannelPipelineFactory {
-        private final int maxBytes;
-
-        ServerPipelineFactory(int maxBytes) {
-            this.maxBytes = maxBytes;
-        }
 
         public ChannelPipeline getPipeline() throws Exception {
             // Create a default pipeline implementation.
             ChannelPipeline pipeline = pipeline();
             // Add the text line codec combination first,
-            pipeline.addLast("framer", new DelimiterBasedFrameDecoder(maxBytes,
+            pipeline.addLast("framer", new DelimiterBasedFrameDecoder(1024,
                     Delimiters.lineDelimiter()));
             pipeline.addLast("decoder", new StringDecoder(CharsetUtil.UTF_8));
             pipeline.addLast("encoder", new StringEncoder(CharsetUtil.UTF_8));
@@ -111,17 +113,4 @@ public class EchoServer {
         }
     }
 
-
-    public static void main(String[] args) throws Exception {
-        int port;
-        int maxBytes;
-        if (args.length > 0) {
-            port = Integer.parseInt(args[0]);
-            maxBytes = Integer.parseInt(args[1]);
-        } else {
-            port = 8080;
-            maxBytes = 8192;
-        }
-        new EchoServer(port,maxBytes).start();
-    }
 }
